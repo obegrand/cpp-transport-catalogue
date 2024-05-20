@@ -98,21 +98,18 @@ void InputReader::ParseLine(std::string_view line) {
 }
 
 // Наполняет данными транспортный справочник, используя команды из commands_
-void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue::TransportCatalogue& catalogue) const {
+void InputReader::ApplyCommands(Catalogue::TransportCatalogue& catalogue) const {
 	for (CommandDescription command : commands_) {
 		if (command.command == "Stop") {
-			TransportCatalogue::Stop stop{ command.id,ParseCoordinates(command.description) };
-			catalogue.Add(std::move(stop));
+			catalogue.Add({ (command.id), ParseCoordinates(command.description) });
 		}
-		else if (command.command == "Bus") {
-			std::vector<std::string> route;
-			for (const auto& view : ParseRoute(command.description)) {
-				route.emplace_back(view.data(), view.size());
-			}
-			TransportCatalogue::Bus bus{ command.id, route};
-			catalogue.Add(std::move(bus));
+	}
+	for (CommandDescription command : commands_) {
+		if (command.command == "Bus") {
+			catalogue.Add( command.id, ParseRoute(command.description));
 		}
 	}
 }
+
 
 } // namespace inputCommand

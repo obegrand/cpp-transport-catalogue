@@ -29,7 +29,7 @@ public:
 	void ParseLine(std::string_view line);
 
 	// Наполняет данными транспортный справочник, используя команды из commands_
-	void ApplyCommands(TransportCatalogue::TransportCatalogue& catalogue) const;
+	void ApplyCommands(Catalogue::TransportCatalogue& catalogue) const;
 
 private:
 	std::vector<CommandDescription> commands_;

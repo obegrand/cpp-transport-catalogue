@@ -3,10 +3,11 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
+#include <deque>
 
 #include "geo.h"
 
-namespace TransportCatalogue {
+namespace Catalogue {
 
 struct Stop {
 	std::string name;
@@ -15,27 +16,32 @@ struct Stop {
 
 struct Bus {
 	std::string number;
-	std::vector<std::string> stops;
+	std::vector<Stop*> stop_names;
 };
 
 class TransportCatalogue {
 public:
-	void Add(const Stop& stop);
-	void Add(const Bus& bus);
+	void Add(Stop stop);
+	void Add(std::string_view number, std::vector<std::string_view> stops);
 
-	const Bus GetBus(const std::string_view number)const;
-	const Stop GetStop(const std::string_view name)const;
-	std::set<std::string> GetBusesByStop(const std::string_view name)const;
+	Bus& GetBus(std::string_view number) const;
+	Stop& GetStop(std::string_view name) const;
 
-	bool ContainsBus(const std::string_view number)const;
-	bool ContainsStop(const std::string_view number)const;
+	std::set<std::string_view> GetBusesByStop(std::string_view name)const;
 
-	double ComputeBusDistance(const Bus& bus)const;
+	bool ContainsBus(std::string_view number)const;
+	bool ContainsStop(std::string_view number)const;
+
+	double ComputeStopsDistance(std::vector<Stop*> stop_names)const;
 
 private:
-	std::unordered_map<std::string, Bus> buses_;
-	std::unordered_map<std::string, Stop> stops_;
-	std::unordered_map<std::string, std::set<std::string>> buses_by_stop_;
+	std::deque<Stop> stops_storage_;
+	std::unordered_map<std::string_view, Stop*> stops_;
+
+	std::deque<Bus> buses_storage_;
+	std::unordered_map<std::string_view, Bus*> buses_;
+
+	std::unordered_map<std::string_view, std::set<std::string_view>> buses_through_stop_;
 };
 
 } // namespace TransportCatalogue

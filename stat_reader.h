@@ -7,13 +7,13 @@
 
 namespace Statistic {
 
-void ParseAndPrintStat(const TransportCatalogue::TransportCatalogue& tansport_catalogue,
+void ParseAndPrintStat(const Catalogue::TransportCatalogue& tansport_catalogue,
     std::string_view request, std::ostream& output);
 
-void PrintBus(const TransportCatalogue::TransportCatalogue& tansport_catalogue,
+void PrintBus(const Catalogue::TransportCatalogue& tansport_catalogue,
     std::string_view request, std::ostream& output);
 
-void PrintStop(const TransportCatalogue::TransportCatalogue& tansport_catalogue,
+void PrintStop(const Catalogue::TransportCatalogue& tansport_catalogue,
     std::string_view request, std::ostream& output);
 
 } // namespace Statistic

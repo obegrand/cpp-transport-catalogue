@@ -2,7 +2,7 @@
 
 namespace Statistic {
 
-void ParseAndPrintStat(const TransportCatalogue::TransportCatalogue& tansport_catalogue,
+void ParseAndPrintStat(const Catalogue::TransportCatalogue& tansport_catalogue,
 	std::string_view request, std::ostream& output) {
 	std::string_view command = request.substr(0, request.find(' '));
 	output << request << ": ";
@@ -16,31 +16,31 @@ void ParseAndPrintStat(const TransportCatalogue::TransportCatalogue& tansport_ca
 	}
 }
 
-void PrintBus(const TransportCatalogue::TransportCatalogue& tansport_catalogue,
+void PrintBus(const Catalogue::TransportCatalogue& tansport_catalogue,
 	std::string_view request, std::ostream& output) {
 	if (!tansport_catalogue.ContainsBus(request)) {
 		output << "not found" << std::endl;
 	}
 	else {
-		TransportCatalogue::Bus bus = tansport_catalogue.GetBus(request);
-		output << bus.stops.size() << " stops on route, ";
-		std::set<std::string> countUniqueStops;
-		for (const auto& stop : bus.stops) {
-			countUniqueStops.insert(stop);
+		Catalogue::Bus& bus = tansport_catalogue.GetBus(request);
+		output << bus.stop_names.size() << " stops on route, ";
+		std::set<std::string_view> countUniqueStops;
+		for (auto stop : bus.stop_names) {
+			countUniqueStops.insert(stop->name);
 		}
 		output << countUniqueStops.size() << " unique stops, "
-			<< tansport_catalogue.ComputeBusDistance(bus)
+			<< tansport_catalogue.ComputeStopsDistance(bus.stop_names)
 			<< " route length" << std::endl;
 	}
 }
 
-void PrintStop(const TransportCatalogue::TransportCatalogue& tansport_catalogue,
+void PrintStop(const Catalogue::TransportCatalogue& tansport_catalogue,
 	std::string_view request, std::ostream& output) {
 	if (!tansport_catalogue.ContainsStop(request)) {
 		output << "not found" << std::endl;
 	}
 	else {
-		std::set<std::string> buses = tansport_catalogue.GetBusesByStop(request);
+		std::set<std::string_view> buses = tansport_catalogue.GetBusesByStop(request);
 		if (buses.empty()) {
 			output << "no buses" << std::endl;
 		}
