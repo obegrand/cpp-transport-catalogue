@@ -4,24 +4,23 @@
 namespace Catalogue {
 
 void TransportCatalogue::Add(Stop stop) {
-	stops_storage_.push_back(stop);
+	stops_storage_.push_back(std::move(stop));
 
 	stops_[stops_storage_.back().name] = &stops_storage_.back();
 	buses_through_stop_[stops_storage_.back().name];
 }
 
-void TransportCatalogue::Add(std::string_view number, std::vector<std::string_view> stops) {
+void TransportCatalogue::Add(std::string_view number, const std::vector<std::string_view>& stops) {
 	Bus newBus = { .number = std::string(number),.stop_names = {} };
 
 	for (const auto& stop : stops) {
-		for (const auto& [key,val] : stops_) {
-			if (stop == key) {
-				newBus.stop_names.push_back(stops_[key]);
-			}
+		auto it = stops_.find(stop);
+		if (it != stops_.end()) {
+			newBus.stop_names.push_back(it->second);
 		}
 	}
 
-	buses_storage_.push_back(newBus);
+	buses_storage_.push_back(std::move(newBus));
 	buses_[buses_storage_.back().number] = &buses_storage_.back();
 
 	for (const auto& stop : stops) {
@@ -29,12 +28,11 @@ void TransportCatalogue::Add(std::string_view number, std::vector<std::string_vi
 	}
 }
 
-
-Bus& TransportCatalogue::GetBus(std::string_view number) const {
+const Bus& TransportCatalogue::GetBus(std::string_view number) const {
 	return buses_.contains(number) ? *buses_.at(number) : throw std::runtime_error("Bus not found");
 }
 
-Stop& TransportCatalogue::GetStop(std::string_view name) const {
+const Stop& TransportCatalogue::GetStop(std::string_view name) const {
 	return stops_.contains(name) ? *stops_.at(name) : throw std::runtime_error("Stop not found");
 }
 
@@ -50,7 +48,7 @@ bool TransportCatalogue::ContainsStop(std::string_view name)const {
 	return stops_.contains(name);
 }
 
-double TransportCatalogue::ComputeStopsDistance(const std::vector<Stop*> stop_names) const {
+double TransportCatalogue::ComputeStopsDistance(const std::vector<Stop*>& stop_names) const {
 	double result = 0.0;
 
 	for (size_t i = 1; i < stop_names.size(); i++) {

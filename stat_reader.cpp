@@ -22,7 +22,7 @@ void PrintBus(const Catalogue::TransportCatalogue& tansport_catalogue,
 		output << "not found" << std::endl;
 	}
 	else {
-		Catalogue::Bus& bus = tansport_catalogue.GetBus(request);
+		const Catalogue::Bus& bus = tansport_catalogue.GetBus(request);
 		output << bus.stop_names.size() << " stops on route, ";
 		std::set<std::string_view> countUniqueStops;
 		for (auto stop : bus.stop_names) {
