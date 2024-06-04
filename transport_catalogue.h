@@ -12,6 +12,7 @@ namespace Catalogue {
 struct Stop {
 	std::string name;
 	Geo::Coordinates coordinates;
+	std::unordered_map<std::string, double> distances_to_other_stops;
 };
 
 struct Bus {
@@ -33,8 +34,10 @@ public:
 	bool ContainsStop(std::string_view number)const;
 
 	double ComputeStopsDistance(const std::vector<Stop*>& stop_names)const;
-
+	double ComputeGeoDistance(const std::vector<Stop*>& stop_names) const;
 private:
+	double GetDistanceBetweenStops(Stop* stop1, Stop* stop2)const;
+
 	std::deque<Stop> stops_storage_;
 	std::unordered_map<std::string_view, Stop*> stops_;
 

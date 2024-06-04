@@ -28,9 +28,12 @@ void PrintBus(const Catalogue::TransportCatalogue& tansport_catalogue,
 		for (auto stop : bus.stop_names) {
 			countUniqueStops.insert(stop->name);
 		}
+		double distance = tansport_catalogue.ComputeStopsDistance(bus.stop_names);
 		output << countUniqueStops.size() << " unique stops, "
-			<< tansport_catalogue.ComputeStopsDistance(bus.stop_names)
-			<< " route length" << std::endl;
+			<< distance
+			<< " route length, "
+			<< distance / tansport_catalogue.ComputeGeoDistance(bus.stop_names)
+			<< " curvature" << std::endl;
 	}
 }
 

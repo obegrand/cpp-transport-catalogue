@@ -89,6 +89,29 @@ CommandDescription ParseCommandDescription(std::string_view line) {
 			std::string(line.substr(colon_pos + 1)) };
 }
 
+
+
+std::unordered_map<std::string, double> ParseDistance(std::string_view string){
+	size_t first = string.find_first_of(',');
+	size_t last = string.find_last_of(',');
+	if (last == first) {
+		return {};
+	}
+	else {
+		string = string.substr(string.find_first_of(',', first + 1)+2, string.size() - string.find_first_of(',', first + 1));
+		
+		std::unordered_map<std::string, double> result;
+		while (!string.empty()) {
+			double distance = static_cast<double>(std::stod(std::string(string.substr(0,string.find_first_of('m')))));
+			std::string_view stop_name = string.substr(string.find_first_of('m')+5, string.find_first_of(',')- string.find_first_of('m') -5);
+			result.insert({ std::string(stop_name),distance });
+			string.find_first_of(',') < last ? string = string.substr(string.find_first_of(',') + 1, string.size() - string.find_first_of(',') + 1) : string = {};
+		}
+
+		return result;
+	}
+}
+
 // Парсит строку в структуру CommandDescription и сохраняет результат в commands_
 void InputReader::ParseLine(std::string_view line) {
 	auto command_description = ParseCommandDescription(line);
@@ -101,7 +124,7 @@ void InputReader::ParseLine(std::string_view line) {
 void InputReader::ApplyCommands(Catalogue::TransportCatalogue& catalogue) const {
 	for (CommandDescription command : commands_) {
 		if (command.command == "Stop") {
-			catalogue.Add({ (command.id), ParseCoordinates(command.description) });
+			catalogue.Add({ (command.id), ParseCoordinates(command.description),ParseDistance(command.description) });
 		}
 	}
 	for (CommandDescription command : commands_) {

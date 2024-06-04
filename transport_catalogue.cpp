@@ -48,7 +48,29 @@ bool TransportCatalogue::ContainsStop(std::string_view name)const {
 	return stops_.contains(name);
 }
 
-double TransportCatalogue::ComputeStopsDistance(const std::vector<Stop*>& stop_names) const {
+double Catalogue::TransportCatalogue::ComputeStopsDistance(const std::vector<Stop*>& stop_names) const {
+	double result = 0.0;
+	for (size_t i = 1; i < stop_names.size(); i++) {
+		result += GetDistanceBetweenStops(stop_names.at(i - 1), stop_names.at(i));
+	}
+	return result;
+}
+
+double TransportCatalogue::GetDistanceBetweenStops(Stop* stop1, Stop* stop2) const {
+	if (stop1->distances_to_other_stops.contains(stop2->name)) {
+		return stop1->distances_to_other_stops.find(stop2->name)->second;
+	}
+	else if (stop2->distances_to_other_stops.contains(stop1->name))
+	{
+		return stop2->distances_to_other_stops.find(stop1->name)->second;
+	}
+	else
+	{
+		return 0; //чего вообще не должно быть по условиям задачи
+	}
+}
+
+double TransportCatalogue::ComputeGeoDistance(const std::vector<Stop*>& stop_names) const {
 	double result = 0.0;
 
 	for (size_t i = 1; i < stop_names.size(); i++) {
