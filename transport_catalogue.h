@@ -35,8 +35,11 @@ public:
 
 	double ComputeStopsDistance(const std::vector<Stop*>& stop_names)const;
 	double ComputeGeoDistance(const std::vector<Stop*>& stop_names) const;
-private:
+
 	double GetDistanceBetweenStops(Stop* stop1, Stop* stop2)const;
+	void SetDistanceBetweenStops(Stop* stop1, Stop* stop2, double distance)const;
+
+private:
 
 	std::deque<Stop> stops_storage_;
 	std::unordered_map<std::string_view, Stop*> stops_;

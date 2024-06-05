@@ -70,6 +70,10 @@ double TransportCatalogue::GetDistanceBetweenStops(Stop* stop1, Stop* stop2) con
 	}
 }
 
+void TransportCatalogue::SetDistanceBetweenStops(Stop* stop1, Stop* stop2, double distance) const {
+	stop1->distances_to_other_stops[stop2->name] = distance;
+}
+
 double TransportCatalogue::ComputeGeoDistance(const std::vector<Stop*>& stop_names) const {
 	double result = 0.0;
 
