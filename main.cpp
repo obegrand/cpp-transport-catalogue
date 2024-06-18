@@ -1,32 +1,13 @@
-#include <iostream>
-#include <string>
-
-#include "input_reader.h"
-#include "stat_reader.h"
-
-using namespace std;
+#include "request_handler.h"
+#include "json_reader.h"
+#include "map_renderer.h"
+#include "svg.h"
 
 int main() {
-    Catalogue::TransportCatalogue catalogue;
-
-    int base_request_count;
-    cin >> base_request_count >> ws;
-
-    {
-        InputCommand::InputReader reader;
-        for (int i = 0; i < base_request_count; ++i) {
-            string line;
-            getline(cin, line);
-            reader.ParseLine(line);
-        }
-        reader.ApplyCommands(catalogue);
-    }
-
-    int stat_request_count;
-    cin >> stat_request_count >> ws;
-    for (int i = 0; i < stat_request_count; ++i) {
-        string line;
-        getline(cin, line);
-        Statistic::ParseAndPrintStat(catalogue, line, cout);
-    }
+	catalogue::TransportCatalogue catalogue;
+	JsonReader reader(std::cin, catalogue);
+	reader.FillCatalogue();
+	RequestHandler(reader, catalogue);
+	//render::MapRender render(reader.FillSettings(reader.GetRenderSettings().AsMap()));
+	//render.GetMap(catalogue.GetAllBusesSorted()).Render(std::cout);
 }

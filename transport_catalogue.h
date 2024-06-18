@@ -5,49 +5,41 @@
 #include <vector>
 #include <deque>
 
-#include "geo.h"
+#include "domain.h"
+#include <map>
 
-namespace Catalogue {
+namespace catalogue {
+	class TransportCatalogue {
+	public:
+		void Add(std::string, geo::Coordinates, std::unordered_map<std::string, double>);
+		void Add(std::string_view, const std::vector<std::string_view>&, bool is_roundtrip);
 
-struct Stop {
-	std::string name;
-	Geo::Coordinates coordinates;
-	std::unordered_map<std::string, double> distances_to_other_stops;
-};
+		const Bus& GetBus(std::string_view) const;
+		const Stop& GetStop(std::string_view) const;
 
-struct Bus {
-	std::string number;
-	std::vector<Stop*> stop_names;
-};
+		std::set<std::string_view> GetBusesByStop(std::string_view)const;
+		const std::unordered_map<std::string_view, const Bus*> GetAllBuses()const;
+		const std::map<std::string_view, const Bus*> GetAllBusesSorted()const;
 
-class TransportCatalogue {
-public:
-	void Add(Stop stop);
-	void Add(std::string_view number, const std::vector<std::string_view>& stops);
+		bool ContainsBus(std::string_view)const;
+		bool ContainsStop(std::string_view)const;
 
-	const Bus& GetBus(std::string_view number) const;
-	const Stop& GetStop(std::string_view name) const;
+		double ComputeStopsDistance(const std::vector<Stop*>&)const;
+		double ComputeGeoDistance(const std::vector<Stop*>&) const;
 
-	std::set<std::string_view> GetBusesByStop(std::string_view name)const;
+		double GetDistanceBetweenStops(Stop*, Stop*)const;
+		void SetDistanceBetweenStops(Stop*, Stop*, double)const;
 
-	bool ContainsBus(std::string_view number)const;
-	bool ContainsStop(std::string_view number)const;
+		void Print();
+	private:
 
-	double ComputeStopsDistance(const std::vector<Stop*>& stop_names)const;
-	double ComputeGeoDistance(const std::vector<Stop*>& stop_names) const;
+		std::deque<Stop> stops_storage_;
+		std::unordered_map<std::string_view, Stop*> stops_;
 
-	double GetDistanceBetweenStops(Stop* stop1, Stop* stop2)const;
-	void SetDistanceBetweenStops(Stop* stop1, Stop* stop2, double distance)const;
+		std::deque<Bus> buses_storage_;
+		std::unordered_map<std::string_view, Bus*> buses_;
 
-private:
-
-	std::deque<Stop> stops_storage_;
-	std::unordered_map<std::string_view, Stop*> stops_;
-
-	std::deque<Bus> buses_storage_;
-	std::unordered_map<std::string_view, Bus*> buses_;
-
-	std::unordered_map<std::string_view, std::set<std::string_view>> buses_through_stop_;
-};
+		std::unordered_map<std::string_view, std::set<std::string_view>> buses_through_stop_;
+	};
 
 } // namespace TransportCatalogue
