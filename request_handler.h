@@ -45,9 +45,9 @@ public:
 	
 	const json::Node PrintStop(const json::Dict& request_map) const;
 
-	const json::Node PrintMap(const json::Dict& request_map, render::MapRender& map_render) const;
+	json::Node PrintMap(const json::Dict& request_map, render::MapRender& map_render) const;
 
-	std::optional<catalogue::BusStat> GetBusStat(const std::string_view& bus_number) const;
+	std::optional<catalogue::BusStat> GetBusStat(const std::string_view bus_number) const;
 
 	const std::set<std::string_view> GetBusesByStop(std::string_view stop_name) const;
 

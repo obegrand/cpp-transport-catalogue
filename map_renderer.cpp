@@ -84,8 +84,7 @@ namespace render {
 		return result;
 	}
 
-	std::vector<svg::Circle> MapRender::GetStopSigns(const std::map<std::string_view, const catalogue::Bus*>& buses, const SphereProjector& sphere_projector) const {
-		std::vector<svg::Circle> result;
+	static std::map<std::string_view, catalogue::Stop*> ComputeStops(const std::map<std::string_view, const catalogue::Bus*>& buses) {
 		std::map<std::string_view, catalogue::Stop*> stops;
 		for (const auto& [bus_number, bus] : buses) {
 			if (bus->stop_names.empty()) continue;
@@ -93,6 +92,11 @@ namespace render {
 				stops[stop->name] = stop;
 			}
 		}
+		return stops;
+	}
+
+	std::vector<svg::Circle> MapRender::GetStopSigns(const std::map<std::string_view, catalogue::Stop*>& stops, const SphereProjector& sphere_projector) const {
+		std::vector<svg::Circle> result;
 		for (const auto& [stop_name, stop] : stops) {
 			svg::Circle stop_sign;
 			stop_sign.SetCenter(sphere_projector(stop->coordinates));
@@ -103,16 +107,8 @@ namespace render {
 		return result;
 	}
 
-	std::vector<svg::Text> MapRender::GetStopNames(const std::map<std::string_view, const catalogue::Bus*>& buses, const SphereProjector& sphere_projector) const {
+	std::vector<svg::Text> MapRender::GetStopNames(const std::map<std::string_view, catalogue::Stop*>& stops, const SphereProjector& sphere_projector) const {
 		std::vector<svg::Text> result;
-		std::map<std::string_view, catalogue::Stop*> stops;
-		for (const auto& [bus_number, bus] : buses) {
-			if (bus->stop_names.empty()) continue;
-			for (const auto& stop : bus->stop_names) {
-				stops[stop->name] = stop;
-			}
-		}
-
 		for (const auto& [stop_name, stop] : stops) {
 			// Общие свойства обоих объектов
 			svg::Text stop_name_default;
@@ -134,11 +130,10 @@ namespace render {
 			stop_name_front.SetFillColor("black");
 			result.push_back(stop_name_front);
 		}
-
 		return result;
 	}
 
-	svg::Document MapRender::GetMap(const std::map<std::string_view, const catalogue::Bus*>& buses) const {
+	svg::Document MapRender::CreateMap(const std::map<std::string_view, const catalogue::Bus*>& buses) const {
 		svg::Document result;
 		std::vector<geo::Coordinates> route_stops_coord;
 
@@ -158,11 +153,11 @@ namespace render {
 			result.Add(route_name);
 		}
 
-		for (const auto& stop_sign : GetStopSigns(buses, sphere_projector)) {
+		std::map<std::string_view, catalogue::Stop*> stops = ComputeStops(buses);
+		for (const auto& stop_sign : GetStopSigns(stops, sphere_projector)) {
 			result.Add(stop_sign);
 		}
-
-		for (const auto& stop_name : GetStopNames(buses, sphere_projector)) {
+		for (const auto& stop_name : GetStopNames(stops, sphere_projector)) {
 			result.Add(stop_name);
 		}
 

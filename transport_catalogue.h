@@ -11,24 +11,26 @@
 namespace catalogue {
 	class TransportCatalogue {
 	public:
-		void Add(std::string, geo::Coordinates, std::unordered_map<std::string, double>);
-		void Add(std::string_view, const std::vector<std::string_view>&, bool is_roundtrip);
+		void AddStop(std::string_view name, geo::Coordinates coordinates);
+		void AddBus(std::string_view number, const std::vector<std::string_view>& stops, bool is_roundtrip);
 
-		const Bus& GetBus(std::string_view) const;
-		const Stop& GetStop(std::string_view) const;
+		const Bus& GetBus(std::string_view number) const;
+		const Stop& GetStop(std::string_view name) const;
 
-		std::set<std::string_view> GetBusesByStop(std::string_view)const;
+		std::set<std::string_view> GetBusesByStop(const std::string_view name)const;
 		const std::unordered_map<std::string_view, const Bus*> GetAllBuses()const;
 		const std::map<std::string_view, const Bus*> GetAllBusesSorted()const;
 
-		bool ContainsBus(std::string_view)const;
-		bool ContainsStop(std::string_view)const;
+		bool ContainsBus(std::string_view number)const;
+		bool ContainsStop(std::string_view name)const;
 
-		double ComputeStopsDistance(const std::vector<Stop*>&)const;
-		double ComputeGeoDistance(const std::vector<Stop*>&) const;
+		double ComputeStopsDistance(const std::vector<Stop*>& stop_names)const;
+		double ComputeGeoDistance(const std::vector<Stop*>& stop_names) const;
 
-		double GetDistanceBetweenStops(Stop*, Stop*)const;
-		void SetDistanceBetweenStops(Stop*, Stop*, double)const;
+		double GetDistanceBetweenStops(const Stop* stop1, const Stop* stop2)const;
+		void SetDistanceBetweenStops(const Stop* stop1, const Stop* stop2, double distance);
+
+		void SetDistances(std::string stop_name, const std::unordered_map<std::string, double>& distances);
 
 		void Print();
 	private:

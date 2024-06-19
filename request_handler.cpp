@@ -67,16 +67,16 @@ const json::Node RequestHandler::PrintStop(const json::Dict& request_map) const 
 	}
 	return json::Node{ result };
 }
-const json::Node RequestHandler::PrintMap(const json::Dict& request_map, render::MapRender& map_render) const {
+json::Node RequestHandler::PrintMap(const json::Dict& request_map, render::MapRender& map_render) const {
 	json::Dict result;
 	result["request_id"] = request_map.at("id").AsInt();
 	std::stringstream output;
-	map_render.GetMap(db_.GetAllBusesSorted()).Render(output);
+	map_render.CreateMap(db_.GetAllBusesSorted()).Render(output);
 	result["map"] = json::Node{ output.str() };
 
 	return json::Node{ result };
 }
-std::optional<catalogue::BusStat> RequestHandler::GetBusStat(const std::string_view& bus_number) const {
+std::optional<catalogue::BusStat> RequestHandler::GetBusStat(const std::string_view bus_number) const {
 	catalogue::BusStat bus_stat{};
 	catalogue::Bus bus = db_.GetBus(bus_number);
 	bus_stat.stops_count = bus.stop_names.size();

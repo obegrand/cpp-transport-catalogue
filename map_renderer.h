@@ -102,12 +102,12 @@ namespace render {
 
     class MapRender {
     public:
-        MapRender(const RenderSettings settings) : settings_(settings) { };
+        explicit MapRender(const RenderSettings& settings) : settings_(settings) {}
         std::vector<svg::Polyline> GetRoutes(const std::map<std::string_view, const catalogue::Bus*>& buses, const SphereProjector& sphere_projector) const;
         std::vector<svg::Text> GetRoutesNames(const std::map<std::string_view, const catalogue::Bus*>& buses, const SphereProjector& sphere_projector) const;
-        std::vector<svg::Circle> GetStopSigns(const std::map<std::string_view, const catalogue::Bus*>& buses, const SphereProjector& sphere_projector) const;
-        std::vector<svg::Text> GetStopNames(const std::map<std::string_view, const catalogue::Bus*>& buses, const SphereProjector& sphere_projector) const;
-        svg::Document GetMap(const std::map<std::string_view, const catalogue::Bus*>& buses) const;
+        std::vector<svg::Circle> GetStopSigns(const std::map<std::string_view, catalogue::Stop*>& stops, const SphereProjector& sphere_projector) const;
+        std::vector<svg::Text> GetStopNames(const std::map<std::string_view, catalogue::Stop*>& stops, const SphereProjector& sphere_projector) const;
+        svg::Document CreateMap(const std::map<std::string_view, const catalogue::Bus*>& buses) const;
     private:
         const RenderSettings settings_;
     };

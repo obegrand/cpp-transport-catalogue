@@ -20,11 +20,11 @@ public:
 	const json::Node& GetRenderSettings() const;
 
 	void AddStop(const json::Dict& stop);
+	void SetDistances(const json::Dict& data);
 	void AddBus(const json::Dict& bus);
 	render::RenderSettings FillSettings(const json::Dict& settings_map) const;
 
 private:
 	catalogue::TransportCatalogue& catalogue_;
 	const json::Document json_doc_;
-	json::Node null = nullptr;
 };

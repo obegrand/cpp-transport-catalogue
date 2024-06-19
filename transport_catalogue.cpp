@@ -5,14 +5,14 @@
 
 namespace catalogue {
 
-	void TransportCatalogue::Add(std::string name, geo::Coordinates coordinates, std::unordered_map<std::string, double> distances_to_other_stops) {
-		stops_storage_.push_back({ name ,coordinates,distances_to_other_stops });
+	void TransportCatalogue::AddStop(std::string_view name, geo::Coordinates coordinates) {
+		stops_storage_.push_back({ std::string(name),coordinates});
 
 		stops_[stops_storage_.back().name] = &stops_storage_.back();
 		buses_through_stop_[stops_storage_.back().name];
 	}
 
-	void TransportCatalogue::Add(std::string_view number, const std::vector<std::string_view>& stops, bool is_roundtrip) {
+	void TransportCatalogue::AddBus(std::string_view number, const std::vector<std::string_view>& stops, bool is_roundtrip) {
 		Bus newBus = { .number = std::string(number),.stop_names = {},.is_roundtrip = is_roundtrip };
 		for (const auto& stop : stops) {
 			auto it = stops_.find(stop);
@@ -74,7 +74,7 @@ namespace catalogue {
 		return result;
 	}
 
-	double TransportCatalogue::GetDistanceBetweenStops(Stop* stop1, Stop* stop2) const {
+	double TransportCatalogue::GetDistanceBetweenStops(const Stop* stop1, const Stop* stop2) const {
 		if (stop1->distances_to_other_stops.contains(stop2->name)) {
 			return stop1->distances_to_other_stops.find(stop2->name)->second;
 		}
@@ -84,8 +84,22 @@ namespace catalogue {
 		else return 0;
 	}
 
-	void TransportCatalogue::SetDistanceBetweenStops(Stop* stop1, Stop* stop2, double distance) const {
-		stop1->distances_to_other_stops[stop2->name] = distance;
+	void TransportCatalogue::SetDistances(std::string stop_name, const std::unordered_map<std::string, double>& distances) {
+		auto it = stops_.find(stop_name);
+		if (it != stops_.end()) {
+			Stop* stop = it->second;
+			for (const auto& [other_stop_name, distance] : distances) {
+				auto other_it = stops_.find(std::string(other_stop_name));
+				if (other_it != stops_.end()) {
+					stop->distances_to_other_stops[std::string(other_it->first)] = distance;
+				}
+			}
+		}
+	}
+
+	void TransportCatalogue::SetDistanceBetweenStops(const Stop* stop1, const Stop* stop2, double distance) {
+		auto it = stops_.find(stop1->name)->second;
+		it->distances_to_other_stops[stop2->name] = distance;
 	}
 
 	void TransportCatalogue::Print() {

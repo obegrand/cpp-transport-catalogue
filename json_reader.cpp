@@ -7,25 +7,31 @@
  */
 
 const json::Node& JsonReader::GetBaseRequests() const {
-	if (!json_doc_.GetRoot().AsMap().count("base_requests")) return null;
+	if (!json_doc_.GetRoot().AsMap().count("base_requests")) return nullptr;
 	return json_doc_.GetRoot().AsMap().at("base_requests");
 }
 
 const json::Node& JsonReader::GetStatRequests() const {
-	if (!json_doc_.GetRoot().AsMap().count("stat_requests")) return null;
+	if (!json_doc_.GetRoot().AsMap().count("stat_requests")) return nullptr;
 	return json_doc_.GetRoot().AsMap().at("stat_requests");
 }
 
 const json::Node& JsonReader::GetRenderSettings() const {
-	if (!json_doc_.GetRoot().AsMap().count("render_settings")) return null;
+	if (!json_doc_.GetRoot().AsMap().count("render_settings")) return nullptr;
 	return json_doc_.GetRoot().AsMap().at("render_settings");
 }
 
 void JsonReader::FillCatalogue() {
+	if (GetBaseRequests() == nullptr) return;
 	const json::Array& base_requests = GetBaseRequests().AsArray();
 	for (auto& request : base_requests) {
 		if (request.AsMap().at("type").AsString() == "Stop") {
 			AddStop(request.AsMap());
+		}
+	}
+	for (auto& request : base_requests) {
+		if (request.AsMap().at("type").AsString() == "Stop") {
+			SetDistances(request.AsMap());
 		}
 	}
 	for (auto& request : base_requests) {
@@ -38,12 +44,17 @@ void JsonReader::FillCatalogue() {
 void JsonReader::AddStop(const json::Dict& data) {
 	std::string stop_name = data.at("name").AsString();
 	geo::Coordinates coordinates = { data.at("latitude").AsDouble(), data.at("longitude").AsDouble() };
+	catalogue_.AddStop(stop_name, coordinates);
+}
+
+void JsonReader::SetDistances(const json::Dict& data) {
+	std::string stop_name = data.at("name").AsString();
 	std::unordered_map<std::string, double> stop_distances;
 	auto& distances = data.at("road_distances").AsMap();
-	for (auto& [stop_name, dist] : distances) {
-		stop_distances.emplace(stop_name, dist.AsInt());
+	for (auto& [other_stop_name, dist] : distances) {
+		stop_distances.emplace(other_stop_name, dist.AsInt());
 	}
-	catalogue_.Add(stop_name, coordinates, stop_distances);
+	catalogue_.SetDistances(stop_name, stop_distances);
 }
 
 void JsonReader::AddBus(const json::Dict& data) {
@@ -58,7 +69,7 @@ void JsonReader::AddBus(const json::Dict& data) {
 			stop_names.push_back(stop_names[i]);
 		}
 	}
-	catalogue_.Add(data.at("name").AsString(), stop_names, is_roundtrip);
+	catalogue_.AddBus(data.at("name").AsString(), stop_names, is_roundtrip);
 }
 
 static svg::Color NodeAsColor(json::Node node) {
@@ -102,7 +113,7 @@ render::RenderSettings JsonReader::FillSettings(const json::Dict& request_map) c
 
 	render_settings.underlayer_width = request_map.at("underlayer_width").AsDouble();
 
-	for (auto node : request_map.at("color_palette").AsArray()) {
+	for (auto& node : request_map.at("color_palette").AsArray()) {
 		render_settings.color_palette.emplace_back(NodeAsColor(node));
 	}
 

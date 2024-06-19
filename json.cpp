@@ -232,26 +232,26 @@ namespace json {
 
 	// ------- Node::Node -------- 
 
-	json::Node::Node(std::nullptr_t)
-		: value_(nullptr) { }
+	//json::Node::Node(std::nullptr_t)
+	//	: value_(nullptr) { }
 
-	json::Node::Node(std::string value)
-		: value_(std::move(value)) { }
+	//json::Node::Node(std::string value)
+	//	: value_(std::move(value)) { }
 
-	json::Node::Node(int value)
-		: value_(value) { }
+	//json::Node::Node(int value)
+	//	: value_(value) { }
 
-	json::Node::Node(double value)
-		: value_(value) { }
+	//json::Node::Node(double value)
+	//	: value_(value) { }
 
-	json::Node::Node(bool value)
-		: value_(value) { }
+	//json::Node::Node(bool value)
+	//	: value_(value) { }
 
-	json::Node::Node(Array array)
-		: value_(std::move(array)) { }
+	//json::Node::Node(Array array)
+	//	: value_(std::move(array)) { }
 
-	json::Node::Node(Dict map)
-		: value_(std::move(map)) { }
+	//json::Node::Node(Dict map)
+	//	: value_(std::move(map)) { }
 
 	// ------- Is -------- 
 
