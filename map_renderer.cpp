@@ -20,7 +20,7 @@ namespace render {
 	}
 
 
-	std::vector<svg::Polyline> MapRender::GetRoutes(const std::map<std::string_view, const catalogue::Bus*>& buses, const SphereProjector& sphere_projector) const {
+	std::vector<svg::Polyline> MapRender::CalculateRoutes(const std::map<std::string_view, const catalogue::Bus*>& buses, const SphereProjector& sphere_projector) const {
 		std::vector<svg::Polyline> result;
 		size_t color_num = 0;
 		for (const auto& [bus_number, bus] : buses) {
@@ -45,7 +45,7 @@ namespace render {
 		return result;
 	}
 
-	std::vector<svg::Text> MapRender::GetRoutesNames(const std::map<std::string_view, const catalogue::Bus*>& buses, const SphereProjector& sphere_projector) const {
+	std::vector<svg::Text> MapRender::CalculateRoutesNames(const std::map<std::string_view, const catalogue::Bus*>& buses, const SphereProjector& sphere_projector) const {
 		std::vector<svg::Text> result;
 		size_t color_num = 0;
 		for (const auto& [bus_number, bus] : buses) {
@@ -95,7 +95,7 @@ namespace render {
 		return stops;
 	}
 
-	std::vector<svg::Circle> MapRender::GetStopSigns(const std::map<std::string_view, catalogue::Stop*>& stops, const SphereProjector& sphere_projector) const {
+	std::vector<svg::Circle> MapRender::CalculateStopSigns(const std::map<std::string_view, catalogue::Stop*>& stops, const SphereProjector& sphere_projector) const {
 		std::vector<svg::Circle> result;
 		for (const auto& [stop_name, stop] : stops) {
 			svg::Circle stop_sign;
@@ -107,7 +107,7 @@ namespace render {
 		return result;
 	}
 
-	std::vector<svg::Text> MapRender::GetStopNames(const std::map<std::string_view, catalogue::Stop*>& stops, const SphereProjector& sphere_projector) const {
+	std::vector<svg::Text> MapRender::CalculateStopNames(const std::map<std::string_view, catalogue::Stop*>& stops, const SphereProjector& sphere_projector) const {
 		std::vector<svg::Text> result;
 		for (const auto& [stop_name, stop] : stops) {
 			// Общие свойства обоих объектов
@@ -145,19 +145,19 @@ namespace render {
 
 		SphereProjector sphere_projector(route_stops_coord.begin(), route_stops_coord.end(), settings_.width, settings_.height, settings_.padding);
 
-		for (const auto& line : GetRoutes(buses, sphere_projector)) {
+		for (const auto& line : CalculateRoutes(buses, sphere_projector)) {
 			result.Add(line);
 		}
 
-		for (const auto& route_name : GetRoutesNames(buses, sphere_projector)) {
+		for (const auto& route_name : CalculateRoutesNames(buses, sphere_projector)) {
 			result.Add(route_name);
 		}
 
 		std::map<std::string_view, catalogue::Stop*> stops = ComputeStops(buses);
-		for (const auto& stop_sign : GetStopSigns(stops, sphere_projector)) {
+		for (const auto& stop_sign : CalculateStopSigns(stops, sphere_projector)) {
 			result.Add(stop_sign);
 		}
-		for (const auto& stop_name : GetStopNames(stops, sphere_projector)) {
+		for (const auto& stop_name : CalculateStopNames(stops, sphere_projector)) {
 			result.Add(stop_name);
 		}
 

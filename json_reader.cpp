@@ -7,17 +7,17 @@
  */
 
 const json::Node& JsonReader::GetBaseRequests() const {
-	if (!json_doc_.GetRoot().AsMap().count("base_requests")) return nullptr;
+	if (!json_doc_.GetRoot().AsMap().count("base_requests")) throw std::out_of_range("Not contain");
 	return json_doc_.GetRoot().AsMap().at("base_requests");
 }
 
 const json::Node& JsonReader::GetStatRequests() const {
-	if (!json_doc_.GetRoot().AsMap().count("stat_requests")) return nullptr;
+	if (!json_doc_.GetRoot().AsMap().count("stat_requests")) throw std::out_of_range("Not contain");
 	return json_doc_.GetRoot().AsMap().at("stat_requests");
 }
 
 const json::Node& JsonReader::GetRenderSettings() const {
-	if (!json_doc_.GetRoot().AsMap().count("render_settings")) return nullptr;
+	if (!json_doc_.GetRoot().AsMap().count("render_settings")) throw std::out_of_range("Not contain");
 	return json_doc_.GetRoot().AsMap().at("render_settings");
 }
 

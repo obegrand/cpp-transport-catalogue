@@ -22,7 +22,7 @@ namespace catalogue {
 	struct Stop {
 		std::string name;
 		geo::Coordinates coordinates;
-		std::unordered_map<std::string, double> distances_to_other_stops;
+		std::unordered_map<std::string_view, double> distances_to_other_stops;
 	};
 
 	struct Bus {
