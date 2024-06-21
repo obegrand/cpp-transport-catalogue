@@ -7,6 +7,7 @@ int main() {
 	catalogue::TransportCatalogue catalogue;
 	JsonReader reader(std::cin, catalogue);
 	reader.FillCatalogue();
+	catalogue.Print();
 	RequestHandler(reader, catalogue);
 	//render::MapRender render(reader.FillSettings(reader.GetRenderSettings().AsMap()));
 	//render.GetMap(catalogue.GetAllBusesSorted()).Render(std::cout);

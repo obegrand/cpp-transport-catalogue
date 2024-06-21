@@ -84,38 +84,27 @@ namespace catalogue {
 		else return 0;
 	}
 
-	void TransportCatalogue::SetDistances(std::string stop_name, const std::unordered_map<std::string, double>& distances) {
-		auto it = stops_.find(stop_name);
-		if (it != stops_.end()) {
-			Stop* stop = it->second;
-			for (const auto& [other_stop_name, distance] : distances) {
-				auto other_it = stops_.find(std::string(other_stop_name));
-				if (other_it != stops_.end()) {
-					stop->distances_to_other_stops[std::string(other_it->first)] = distance;
-				}
-			}
-		}
-	}
-
 	void TransportCatalogue::SetDistanceBetweenStops(const Stop* stop1, const Stop* stop2, double distance) {
-		auto it = stops_.find(stop1->name)->second;
-		it->distances_to_other_stops[stop2->name] = distance;
+		auto it = stops_.find(stop1->name);
+		if (it != stops_.end()) { 
+			it->second->distances_to_other_stops[stop2->name] = distance;
+		};
 	}
 
 	void TransportCatalogue::Print() {
-		std::cout << "Stops:" << std::endl;
+		std::cerr << "\nStops:" << std::endl;
 		for (auto& stop : stops_storage_) {
-			std::cout << "  " << stop.name << ": " <<
+			std::cerr << "  " << stop.name << ": " <<
 				stop.coordinates.lat << "," << stop.coordinates.lng << std::endl;
 			for (auto& stop_name : stop.distances_to_other_stops) {
-				std::cout << "    " << stop_name.first << ": " << stop_name.second << std::endl;
+				std::cerr << "    " << stop_name.first << ": " << stop_name.second << std::endl;
 			}
 		}
-		std::cout << "Buses:" << std::endl;
+		std::cerr << "Buses:" << std::endl;
 		for (auto& bus : buses_storage_) {
-			std::cout << "  " << bus.number << ": " << bus.is_roundtrip << std::endl;
+			std::cerr << "  " << bus.number << ": " << bus.is_roundtrip << std::endl;
 			for (auto& stop_name : bus.stop_names) {
-				std::cout << "    " << stop_name->name << std::endl;
+				std::cerr << "    " << stop_name->name << std::endl;
 			}
 		}
 	}

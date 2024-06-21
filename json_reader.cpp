@@ -48,13 +48,12 @@ void JsonReader::AddStop(const json::Dict& data) {
 }
 
 void JsonReader::SetDistances(const json::Dict& data) {
-	std::string stop_name = data.at("name").AsString();
-	std::unordered_map<std::string, double> stop_distances;
-	auto& distances = data.at("road_distances").AsMap();
-	for (auto& [other_stop_name, dist] : distances) {
-		stop_distances.emplace(other_stop_name, dist.AsInt());
+	for (auto& [other_stop_name, dist] : data.at("road_distances").AsMap()) {
+		catalogue_.SetDistanceBetweenStops(
+			&catalogue_.GetStop(data.at("name").AsString()),
+			&catalogue_.GetStop(other_stop_name),
+			dist.AsInt());
 	}
-	catalogue_.SetDistances(stop_name, stop_distances);
 }
 
 void JsonReader::AddBus(const json::Dict& data) {
