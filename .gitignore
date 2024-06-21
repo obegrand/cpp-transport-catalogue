@@ -1,0 +1,12 @@
+﻿################################################################################
+# Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/cpp-tran.02D9D15D/x64
+/cpp-transport-catalogue.sln
+/cpp-transport-catalogue.vcxproj
+/cpp-transport-catalogue.vcxproj.filters
+/cpp-transport-catalogue.vcxproj.user
+/x64
+/log_duration.h
