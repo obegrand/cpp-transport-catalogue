@@ -6,7 +6,7 @@
 namespace catalogue {
 
 	void TransportCatalogue::AddStop(std::string_view name, geo::Coordinates coordinates) {
-		stops_storage_.push_back({ std::string(name),coordinates});
+		stops_storage_.push_back({ std::string(name), coordinates, {} });
 
 		stops_[stops_storage_.back().name] = &stops_storage_.back();
 		buses_through_stop_[stops_storage_.back().name];
