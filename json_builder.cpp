@@ -8,7 +8,7 @@ namespace json {
 		node_stack_.push_back(&node_);
 	}
 
-	JsonDictKey Builder::Key(std::string key) {
+	Builder::JsonDictKey Builder::Key(std::string key) {
 		Node* node_stack = node_stack_.back();
 		if ((!node_stack->IsMap() || !node_stack->IsArray()) && key_.has_value())
 			throw std::logic_error("reuse key or outside array or dict");
@@ -17,31 +17,17 @@ namespace json {
 	}
 
 	Builder& Builder::Value(Node::Value value) {
-		Node* node_stack = node_stack_.back();
-		if (node_stack->IsMap()) {
-			if (!key_.has_value()) throw std::logic_error("key is empty");
-			std::get<Dict>(node_stack->GetValue())[key_.value()].GetValue() = std::move(value);
-			key_.reset();
-		}
-		else if (node_stack->IsArray()) {
-			std::get<Array>(node_stack->GetValue()).emplace_back().GetValue() = std::move(value);
-		}
-		else if (node_stack->IsNull()) {
-			node_.GetValue() = std::move(value);
-		}
-		else {
-			throw std::logic_error("overloading the value");
-		}
+		AddNode(std::move(value));
 		return *this;
 	}
 
-	JsonDictItem Builder::StartDict() {
-		AddNode(std::move(Dict{}));
+	Builder::JsonDictItem Builder::StartDict() {
+		AddNode(Dict{}, true);
 		return *this;
 	}
 
-	JsonArrayItem Builder::StartArray() {
-		AddNode(std::move(Array{}));
+	Builder::JsonArrayItem Builder::StartArray() {
+		AddNode(Array{}, true);
 		return *this;
 	}
 
@@ -65,45 +51,68 @@ namespace json {
 		return node_;
 	}
 
-	//---------- JsonDictKey ------------
+	void Builder::AddNode(Node node, bool shouldPushOnStack) {
+		Node* node_stack = node_stack_.back();
+		if (node_stack->IsMap()) {
+			if (!key_.has_value()) throw std::logic_error("key is empty");
+			Dict& dict = std::get<Dict>(node_stack->GetValue());
+			dict[std::move(key_.value())] = std::move(node);
+			if (shouldPushOnStack) node_stack_.push_back(&dict[std::move(key_.value())]);
+			key_.reset();
+		}
+		else if (node_stack->IsArray()) {
+			Array& arr = std::get<Array>(node_stack->GetValue());
+			arr.emplace_back() = std::move(node);
+			if (shouldPushOnStack) node_stack_.push_back(&arr.back());
 
-	JsonDictItem JsonDictKey::Value(Node::Value value) {
-		return JsonDictItem(builder_.Value(value));
+		}
+		else if (node_stack->IsNull()) {
+			node_ = std::move(node);
+		}
+		else {
+			throw std::logic_error("overloading the value");
+		}
 	}
 
-	JsonDictItem JsonDictKey::StartDict() {
+	//---------- JsonDictKey ------------
+
+	Builder::JsonDictItem Builder::JsonDictKey::Value(Node::Value value) {
+		return JsonDictItem(builder_.Value(std::move(value)));
+	}
+
+	Builder::JsonDictItem Builder::JsonDictKey::StartDict() {
 		return builder_.StartDict();
 	}
 
-	JsonArrayItem JsonDictKey::StartArray() {
+	Builder::JsonArrayItem Builder::JsonDictKey::StartArray() {
 		return builder_.StartArray();
 	}
 
 	//---------- JsonDictItem ------------
 
-	JsonDictKey JsonDictItem::Key(std::string key) {
-		return builder_.Key(key);
+	Builder::JsonDictKey Builder::JsonDictItem::Key(std::string key) {
+		return builder_.Key(std::move(key));
 	}
 
-	Builder& JsonDictItem::EndDict() {
+	Builder& Builder::JsonDictItem::EndDict() {
 		return builder_.EndDict();
 	}
 
 	//---------- JsonArrayItem ------------
 
-	JsonArrayItem JsonArrayItem::Value(Node::Value value) {
-		return JsonArrayItem(builder_.Value(value));
+	Builder::JsonArrayItem Builder::JsonArrayItem::Value(Node::Value value) {
+		return JsonArrayItem(builder_.Value(std::move(value)));
 	}
 
-	JsonDictItem JsonArrayItem::StartDict() {
+	Builder::JsonDictItem Builder::JsonArrayItem::StartDict() {
 		return builder_.StartDict();
 	}
 
-	JsonArrayItem JsonArrayItem::StartArray() {
+	Builder::JsonArrayItem Builder::JsonArrayItem::StartArray() {
 		return builder_.StartArray();
 	}
 
-	Builder& JsonArrayItem::EndArray() {
+	Builder& Builder::JsonArrayItem::EndArray() {
 		return builder_.EndArray();
 	}
 
