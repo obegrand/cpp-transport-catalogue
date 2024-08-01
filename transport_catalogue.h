@@ -19,18 +19,20 @@ namespace catalogue {
 
 		std::set<std::string_view> GetBusesByStop(const std::string_view name)const;
 		const std::unordered_map<std::string_view, const Bus*> GetAllBuses()const;
+		const std::unordered_map<std::string_view, const Stop*> GetAllStops()const;
 		const std::map<std::string_view, const Bus*> GetAllBusesSorted()const;
+		const std::map<std::string_view, const Stop*> GetAllStopsSorted()const;
 
 		bool ContainsBus(std::string_view number)const;
 		bool ContainsStop(std::string_view name)const;
 
 		double ComputeStopsDistance(const std::vector<Stop*>& stop_names)const;
+		template<typename Iterator>
+		double ComputeStopsDistance(Iterator first, Iterator last)const;
 		double ComputeGeoDistance(const std::vector<Stop*>& stop_names) const;
 
 		double GetDistanceBetweenStops(const Stop* stop1, const Stop* stop2)const;
 		void SetDistanceBetweenStops(const Stop* stop1, const Stop* stop2, double distance);
-
-		void SetDistances(std::string stop_name, const std::unordered_map<std::string, double>& distances);
 
 		void Print();
 	private:
@@ -43,5 +45,14 @@ namespace catalogue {
 
 		std::unordered_map<std::string_view, std::set<std::string_view>> buses_through_stop_;
 	};
+
+	template<typename Iterator>
+	double TransportCatalogue::ComputeStopsDistance(Iterator first, Iterator last) const {
+		double result = 0.0;
+		while (first != last) {
+			result += GetDistanceBetweenStops(*first, *(first++));
+		}
+		return result;
+	}
 
 } // namespace TransportCatalogue

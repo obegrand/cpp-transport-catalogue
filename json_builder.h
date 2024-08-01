@@ -52,7 +52,7 @@ namespace json {
 	class Builder::JsonArrayItem {
 	public:
 		JsonArrayItem(Builder& builder) : builder_(builder) { }
-		
+
 		JsonArrayItem Value(Node::Value value);
 		JsonDictItem StartDict();
 		JsonArrayItem StartArray();

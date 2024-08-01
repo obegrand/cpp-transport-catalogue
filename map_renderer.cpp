@@ -72,8 +72,8 @@ namespace render {
 			result.push_back(route_name);
 			//Если некольцевая добавляет надпись второй конечной станции
 			if (!bus->is_roundtrip && bus->stop_names.at(0) != bus->stop_names.at(bus->stop_names.size() / 2)) {
-				route_name_backlayer.SetPosition(sphere_projector(bus->stop_names.at(bus->stop_names.size()/2)->coordinates));
-				route_name.SetPosition(sphere_projector(bus->stop_names.at(bus->stop_names.size()/2)->coordinates));
+				route_name_backlayer.SetPosition(sphere_projector(bus->stop_names.at(bus->stop_names.size() / 2)->coordinates));
+				route_name.SetPosition(sphere_projector(bus->stop_names.at(bus->stop_names.size() / 2)->coordinates));
 				result.push_back(route_name_backlayer);
 				result.push_back(route_name);
 			}

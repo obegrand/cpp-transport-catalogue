@@ -10,8 +10,8 @@
  * можете оставить его пустым.
  */
 
-RequestHandler::RequestHandler(JsonReader& requests, catalogue::TransportCatalogue& catalogue)
-	: requests_(requests), db_(catalogue) {
+RequestHandler::RequestHandler(JsonReader& requests, catalogue::TransportCatalogue& catalogue, transport::Router& router)
+	: requests_(requests), db_(catalogue), router_(router) {
 	ProcessRequests();
 }
 
@@ -27,8 +27,11 @@ void RequestHandler::ProcessRequests() const {
 			result.push_back(PrintBus(stat_request.AsMap()));
 		}
 		else if (type == "Map") {
-			render::MapRender map_render(requests_.FillSettings(requests_.GetRenderSettings().AsMap()));
-			result.push_back(PrintMap(stat_request.AsMap(),map_render));
+			render::MapRender map_render(requests_.FillRenderSettings(requests_.GetRenderSettings().AsMap()));
+			result.push_back(PrintMap(stat_request.AsMap(), map_render));
+		}
+		else if (type == "Route") {
+			result.push_back(PrintRoute(stat_request.AsMap()));
 		}
 	}
 	json::Print(json::Document{ result }, std::cout);
@@ -40,22 +43,22 @@ const json::Node RequestHandler::PrintBus(const json::Dict& request_map) const {
 	const int id = request_map.at("id").AsInt();
 	if (!db_.ContainsBus(bus_name)) {
 		result = json::Builder{}
-				.StartDict()
-					.Key("request_id").Value(id)
-					.Key("error_message").Value("not found")
-				.EndDict()
+			.StartDict()
+			.Key("request_id").Value(id)
+			.Key("error_message").Value("not found")
+			.EndDict()
 			.Build();
 	}
 	else {
 		catalogue::BusStat bus_stat = GetBusStat(bus_name).value();
 		result = json::Builder{}
-				.StartDict()
-					.Key("curvature").Value(bus_stat.curvature)
-					.Key("route_length").Value(bus_stat.route_length)
-					.Key("stop_count").Value(bus_stat.stops_count)
-					.Key("unique_stop_count").Value(bus_stat.unique_stops_count)
-					.Key("request_id").Value(id)
-				.EndDict()
+			.StartDict()
+			.Key("curvature").Value(bus_stat.curvature)
+			.Key("route_length").Value(bus_stat.route_length)
+			.Key("stop_count").Value(bus_stat.stops_count)
+			.Key("unique_stop_count").Value(bus_stat.unique_stops_count)
+			.Key("request_id").Value(id)
+			.EndDict()
 			.Build();
 	}
 	return result;
@@ -67,10 +70,10 @@ const json::Node RequestHandler::PrintStop(const json::Dict& request_map) const 
 	const int id = request_map.at("id").AsInt();
 	if (!db_.ContainsStop(stop_name)) {
 		result = json::Builder{}
-				.StartDict()
-					.Key("error_message").Value("not found")
-					.Key("request_id").Value(id)
-				.EndDict()
+			.StartDict()
+			.Key("error_message").Value("not found")
+			.Key("request_id").Value(id)
+			.EndDict()
 			.Build();
 	}
 	else {
@@ -79,12 +82,66 @@ const json::Node RequestHandler::PrintStop(const json::Dict& request_map) const 
 			buses.push_back(std::string(bus));
 		}
 		result = json::Builder{}
-				.StartDict()
-					.Key("buses").Value(buses)
-					.Key("request_id").Value(id)
-				.EndDict()
+			.StartDict()
+			.Key("buses").Value(buses)
+			.Key("request_id").Value(id)
+			.EndDict()
 			.Build();
 	}
+	return result;
+}
+
+const json::Node RequestHandler::PrintRoute(const json::Dict& request_map) const {
+	json::Node result;
+	const int id = request_map.at("id").AsInt();
+	const std::string_view stop_from = request_map.at("from").AsString();
+	const std::string_view stop_to = request_map.at("to").AsString();
+	const auto& router = router_.FindRoute(stop_from, stop_to);
+
+	if (!router) {
+		result = json::Builder{}
+			.StartDict()
+			.Key("error_message").Value("not found")
+			.Key("request_id").Value(id)
+			.EndDict()
+			.Build();
+	}
+	else {
+		json::Array items;
+		double total_time = 0.0;
+		items.reserve(router.value().edges.size());
+		for (const graph::EdgeId& id : router.value().edges) {
+			const graph::Edge<double> edge = router_.GetGraph().GetEdge(id);
+
+				items.emplace_back(json::Node(json::Builder{}
+					.StartDict()
+					.Key("stop_name").Value(router_.GetStopName(edge.from))
+					.Key("time").Value(router_.GetWaitTime())
+					.Key("type").Value("Wait")
+					.EndDict()
+					.Build()));
+
+				items.emplace_back(json::Node(json::Builder{}
+					.StartDict()
+					.Key("bus").Value(std::string(edge.name))
+					.Key("span_count").Value(static_cast<int>(edge.stops_count))
+					.Key("time").Value(edge.weight - router_.GetWaitTime())
+					.Key("type").Value("Bus")
+					.EndDict()
+					.Build()));
+
+				total_time += edge.weight;
+		}
+
+		result = json::Builder{}
+			.StartDict()
+			.Key("request_id").Value(id)
+			.Key("total_time").Value(total_time)
+			.Key("items").Value(items)
+			.EndDict()
+			.Build();
+	}
+
 	return result;
 }
 
@@ -94,10 +151,10 @@ json::Node RequestHandler::PrintMap(const json::Dict& request_map, render::MapRe
 	std::stringstream output;
 	map_render.CreateMap(db_.GetAllBusesSorted()).Render(output);
 	result = json::Builder{}
-			.StartDict()
-				.Key("map").Value(output.str())
-				.Key("request_id").Value(id)
-			.EndDict()
+		.StartDict()
+		.Key("map").Value(output.str())
+		.Key("request_id").Value(id)
+		.EndDict()
 		.Build();
 	return result;
 }

@@ -73,7 +73,7 @@ namespace json {
 		int indent = 0;
 
 		void PrintIndent(int x = 0) const {
-			for (int i = 0; i < indent+x; ++i) {
+			for (int i = 0; i < indent + x; ++i) {
 				out.put(' ');
 			}
 		}

@@ -1,7 +1,7 @@
 #include "json_builder.h"
 
 namespace json {
-	
+
 	//---------- Builder ------------
 
 	Builder::Builder() {
@@ -44,9 +44,9 @@ namespace json {
 	}
 
 	Node& Builder::Build() {
-		if (node_ == nullptr || 
-			node_stack_.size() > 1 || 
-			key_.has_value()) 
+		if (node_ == nullptr ||
+			node_stack_.size() > 1 ||
+			key_.has_value())
 			throw std::logic_error("json document is not completed");
 		return node_;
 	}
