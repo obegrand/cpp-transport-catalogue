@@ -96,9 +96,9 @@ const json::Node RequestHandler::PrintRoute(const json::Dict& request_map) const
 	const int id = request_map.at("id").AsInt();
 	const std::string_view stop_from = request_map.at("from").AsString();
 	const std::string_view stop_to = request_map.at("to").AsString();
-	const auto& router = router_.FindRoute(stop_from, stop_to);
+	const auto& route = router_.FindRoute(stop_from, stop_to);
 
-	if (!router) {
+	if (route.empty() && stop_from != stop_to) {
 		result = json::Builder{}
 			.StartDict()
 			.Key("error_message").Value("not found")
@@ -109,28 +109,29 @@ const json::Node RequestHandler::PrintRoute(const json::Dict& request_map) const
 	else {
 		json::Array items;
 		double total_time = 0.0;
-		items.reserve(router.value().edges.size());
-		for (const graph::EdgeId& id : router.value().edges) {
-			const graph::Edge<double> edge = router_.GetGraph().GetEdge(id);
-
+		items.reserve(route.size());
+		for (const auto& rouht_element : route) {
+			if (rouht_element.stop_count == 0) {
 				items.emplace_back(json::Node(json::Builder{}
 					.StartDict()
-					.Key("stop_name").Value(router_.GetStopName(edge.from))
-					.Key("time").Value(router_.GetWaitTime())
+					.Key("stop_name").Value(rouht_element.name)
+					.Key("time").Value(rouht_element.time)
 					.Key("type").Value("Wait")
 					.EndDict()
 					.Build()));
-
+				total_time += rouht_element.time;
+			}
+			else {
 				items.emplace_back(json::Node(json::Builder{}
 					.StartDict()
-					.Key("bus").Value(std::string(edge.name))
-					.Key("span_count").Value(static_cast<int>(edge.stops_count))
-					.Key("time").Value(edge.weight - router_.GetWaitTime())
+					.Key("bus").Value(rouht_element.name)
+					.Key("span_count").Value(rouht_element.stop_count)
+					.Key("time").Value(rouht_element.time)
 					.Key("type").Value("Bus")
 					.EndDict()
 					.Build()));
-
-				total_time += edge.weight;
+				total_time += rouht_element.time;
+			}
 		}
 
 		result = json::Builder{}

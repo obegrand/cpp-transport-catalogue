@@ -7,7 +7,7 @@ namespace transport {
 		const auto& all_buses = catalogue.GetAllBuses();
 
 		graph::DirectedWeightedGraph<double> stops_graph(all_stops.size());
-		double bus_speed = bus_velocity_ * (100.0 / 6.0);
+		double bus_speed = settings_.bus_velocity_ * (100.0 / 6.0);
 
 		{
 			graph::VertexId vertex_id = 0;
@@ -34,7 +34,7 @@ namespace transport {
 					stops_graph.AddEdge({
 						/*from*/	stop_ids_.at(stop_from->name),
 						/*to*/		stop_ids_.at(stop_to->name),
-						/*distance*/static_cast<double>(distance) / bus_speed + static_cast<double>(bus_wait_time_),
+						/*distance*/static_cast<double>(distance) / bus_speed + static_cast<double>(settings_.bus_wait_time_),
 						/*name*/	bus->number,
 						/*stops_count*/	to_id - from_id
 						});
@@ -49,7 +49,7 @@ namespace transport {
 						stops_graph.AddEdge({
 							/*from*/	stop_ids_.at(stop_to->name),
 							/*to*/		stop_ids_.at(stop_from->name),
-							/*distance*/static_cast<double>(distance) / bus_speed + static_cast<double>(bus_wait_time_),
+							/*distance*/static_cast<double>(distance) / bus_speed + static_cast<double>(settings_.bus_wait_time_),
 							/*name*/	bus->number,
 							/*stops_count*/	to_id - from_id
 							});
@@ -64,8 +64,29 @@ namespace transport {
 		return graph_;
 	}
 
-	const std::optional<graph::Router<double>::RouteInfo> Router::FindRoute(const std::string_view stop_from, const std::string_view stop_to) const {
-		return router_->BuildRoute(stop_ids_.at(std::string(stop_from)), stop_ids_.at(std::string(stop_to)));
+	const Route Router::FindRoute(const std::string_view stop_from, const std::string_view stop_to) const {
+		Route result;
+		const auto& router = router_->BuildRoute(stop_ids_.at(std::string(stop_from)), stop_ids_.at(std::string(stop_to)));
+		if (!router) return result;
+		for (const graph::EdgeId& id : router.value().edges) {
+			const graph::Edge<double> edge = graph_.GetEdge(id);
+
+			RouteElement element_stop({
+				stop_ids_reverse_.at(edge.from),
+				static_cast<double>(settings_.bus_wait_time_),
+				0
+				});
+			result.emplace_back(element_stop);
+
+			RouteElement element_bus({
+				std::string(edge.name),
+				edge.weight - settings_.bus_wait_time_,
+				static_cast<int>(edge.stops_count)
+				});
+			result.emplace_back(element_bus);
+		}
+
+		return result;
 	}
 
 	const graph::DirectedWeightedGraph<double>& Router::GetGraph() const {
@@ -76,6 +97,6 @@ namespace transport {
 		return stop_ids_reverse_.at(stop_name);
 	}
 	int Router::GetWaitTime() const {
-		return bus_wait_time_;
+		return settings_.bus_wait_time_;
 	}
 }

@@ -50,7 +50,11 @@ namespace catalogue {
 	double TransportCatalogue::ComputeStopsDistance(Iterator first, Iterator last) const {
 		double result = 0.0;
 		while (first != last) {
-			result += GetDistanceBetweenStops(*first, *(first++));
+			const auto& currentStop = *first;
+			++first;
+			if (first != last) {
+				result += GetDistanceBetweenStops(currentStop, *first);
+			}
 		}
 		return result;
 	}
