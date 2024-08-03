@@ -49,12 +49,8 @@ namespace catalogue {
 	template<typename Iterator>
 	double TransportCatalogue::ComputeStopsDistance(Iterator first, Iterator last) const {
 		double result = 0.0;
-		while (first != last) {
-			const auto& currentStop = *first;
-			++first;
-			if (first != last) {
-				result += GetDistanceBetweenStops(currentStop, *first);
-			}
+		for (; first != last; ++first) {
+			result += GetDistanceBetweenStops(*first, *(first + 1));
 		}
 		return result;
 	}

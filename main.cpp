@@ -8,9 +8,7 @@ int main() {
 	JsonReader reader(std::cin, catalogue);
 	reader.FillCatalogue();
 	transport::Router router(
-		/*settings*/ reader.FillRoutingSettings(
-						reader.GetRoutingSettings().AsMap()
-					 ),
+		/*settings*/ reader.FillRoutingSettings( reader.GetRoutingSettings().AsMap() ),
 		/*catalogue*/ catalogue);
 	RequestHandler(reader, catalogue, router);
 }
