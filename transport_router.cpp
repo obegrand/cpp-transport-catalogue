@@ -20,7 +20,6 @@ namespace transport {
 
 		for (const auto& [bus_name, bus] : all_buses) {
 			const std::vector<catalogue::Stop*>& stops = bus->stop_names;
-
 			for (size_t from_id = 0; from_id < stops.size(); ++from_id) {
 				for (size_t to_id = from_id + 1; to_id < stops.size(); ++to_id) {
 
@@ -28,12 +27,8 @@ namespace transport {
 					const catalogue::Stop* stop_to = stops[to_id];
 
 					double distance = 0;
-					double distance_reverse = 0;
-
 					for (size_t from_to_count = from_id; from_to_count < to_id; ++from_to_count) {
 						distance += catalogue.GetDistanceBetweenStops(stops[from_to_count], stops[from_to_count + 1]);
-						distance_reverse += catalogue.GetDistanceBetweenStops(stops[from_to_count + 1], stops[from_to_count]);
-
 					}
 
 					stops_graph.AddEdge({
@@ -44,11 +39,17 @@ namespace transport {
 						/*stops_count*/	to_id - from_id
 						});
 
+
 					if (!bus->is_roundtrip) {
+						double distance = 0;
+						for (size_t from_to_count = from_id; from_to_count < to_id; ++from_to_count) {
+							distance += catalogue.GetDistanceBetweenStops(stops[from_to_count + 1], stops[from_to_count]);
+						}
+
 						stops_graph.AddEdge({
 							/*from*/	stop_ids_.at(stop_to->name),
 							/*to*/		stop_ids_.at(stop_from->name),
-							/*distance*/static_cast<double>(distance_reverse) / bus_speed + static_cast<double>(settings_.bus_wait_time_),
+							/*distance*/static_cast<double>(distance) / bus_speed + static_cast<double>(settings_.bus_wait_time_),
 							/*name*/	bus->number,
 							/*stops_count*/	to_id - from_id
 							});
@@ -90,5 +91,12 @@ namespace transport {
 
 	const graph::DirectedWeightedGraph<double>& Router::GetGraph() const {
 		return graph_;
+	}
+
+	const std::string& Router::GetStopName(const graph::VertexId stop_name) const {
+		return stop_ids_reverse_.at(stop_name);
+	}
+	int Router::GetWaitTime() const {
+		return settings_.bus_wait_time_;
 	}
 }

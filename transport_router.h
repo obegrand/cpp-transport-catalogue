@@ -27,6 +27,8 @@ public:
 
 	const Route FindRoute(const std::string_view stop_from, const std::string_view stop_to) const;
 	const graph::DirectedWeightedGraph<double>& GetGraph() const;
+	const std::string& GetStopName(const graph::VertexId stop_name) const;
+	int GetWaitTime() const;
 
 private:
 	RoutingSettings settings_;
